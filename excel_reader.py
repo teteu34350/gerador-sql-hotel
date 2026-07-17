@@ -1,14 +1,15 @@
 import pandas as pd
-
-
-def ler_planilha(caminho_arquivo):
+def listar_abas(caminho_arquivo):
+    excel = pd.ExcelFile(caminho_arquivo)
+    return excel.sheet_names
+def ler_planilha(caminho_arquivo,aba):
     """
     Lê a planilha do Excel e retorna um DataFrame tratado.
     """
 
     dados = pd.read_excel(
         caminho_arquivo,
-        sheet_name="JUL-26",  # Depois vamos automatizar isso
+        sheet_name= aba,  
         usecols=["Data", "Manutenção"]
     )
 
@@ -26,4 +27,3 @@ def ler_planilha(caminho_arquivo):
 
     return dados
 
-print(ler_planilha("teste.xlsx"))

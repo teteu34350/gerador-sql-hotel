@@ -2,8 +2,9 @@ import customtkinter as ctk
 from tkinter import filedialog
 
 from hotel_manager import listar_nomes, buscar_id
-from excel_reader import ler_planilha
+from excel_reader import ler_planilha, listar_abas
 from sql_generator import gerar_sql_manutencao
+
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -22,6 +23,7 @@ class App(ctk.CTk):
 
         self.criar_componentes()
 
+
     def criar_componentes(self):
 
         # ---------- HOTEL ----------
@@ -33,12 +35,14 @@ class App(ctk.CTk):
         )
         self.label_hotel.pack(pady=(20, 5))
 
+
         self.combo_hotel = ctk.CTkComboBox(
             self,
             values=listar_nomes(),
             width=400
         )
         self.combo_hotel.pack()
+
 
         # ---------- EXCEL ----------
 
@@ -49,8 +53,10 @@ class App(ctk.CTk):
         )
         self.label_excel.pack(pady=(20, 5))
 
+
         self.frame_excel = ctk.CTkFrame(self)
         self.frame_excel.pack()
+
 
         self.label_arquivo = ctk.CTkLabel(
             self.frame_excel,
@@ -58,14 +64,41 @@ class App(ctk.CTk):
             width=350,
             anchor="w"
         )
-        self.label_arquivo.pack(side="left", padx=10, pady=10)
+        self.label_arquivo.pack(
+            side="left",
+            padx=10,
+            pady=10
+        )
+
 
         self.botao_excel = ctk.CTkButton(
             self.frame_excel,
             text="Selecionar",
             command=self.selecionar_excel
         )
-        self.botao_excel.pack(side="left", padx=10)
+        self.botao_excel.pack(
+            side="left",
+            padx=10
+        )
+
+
+        # ---------- ABA EXCEL ----------
+
+        self.label_aba = ctk.CTkLabel(
+            self,
+            text="Aba",
+            font=("Arial", 18, "bold")
+        )
+        self.label_aba.pack(pady=(20,5))
+
+
+        self.combo_aba = ctk.CTkComboBox(
+            self,
+            values=[],
+            width=400
+        )
+        self.combo_aba.pack()
+
 
         # ---------- BOTÃO GERAR ----------
 
@@ -78,6 +111,7 @@ class App(ctk.CTk):
         )
         self.botao_gerar.pack(pady=20)
 
+
         # ---------- SQL ----------
 
         self.label_sql = ctk.CTkLabel(
@@ -87,6 +121,7 @@ class App(ctk.CTk):
         )
         self.label_sql.pack()
 
+
         self.textbox = ctk.CTkTextbox(
             self,
             width=800,
@@ -94,65 +129,132 @@ class App(ctk.CTk):
         )
         self.textbox.pack(pady=10)
 
+
         # ---------- BOTÕES ----------
 
-        self.frame_botoes = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_botoes = ctk.CTkFrame(
+            self,
+            fg_color="transparent"
+        )
         self.frame_botoes.pack()
+
 
         self.botao_copiar = ctk.CTkButton(
             self.frame_botoes,
             text="Copiar SQL",
             command=self.copiar_sql
         )
-        self.botao_copiar.pack(side="left", padx=10)
+        self.botao_copiar.pack(
+            side="left",
+            padx=10
+        )
+
 
         self.botao_limpar = ctk.CTkButton(
             self.frame_botoes,
             text="Limpar",
             command=self.limpar
         )
-        self.botao_limpar.pack(side="left")
+        self.botao_limpar.pack(
+            side="left"
+        )
+
 
     def selecionar_excel(self):
 
         caminho = filedialog.askopenfilename(
-            filetypes=[("Excel", "*.xlsx *.xls")]
+            filetypes=[
+                ("Excel", "*.xlsx *.xls")
+            ]
         )
 
+
         if caminho:
+
             self.caminho_excel = caminho
-            self.label_arquivo.configure(text=caminho.split("/")[-1])
+
+
+            self.label_arquivo.configure(
+                text=caminho.split("/")[-1]
+            )
+
+
+            # Carrega abas visíveis
+            abas = listar_abas(caminho)
+
+
+            self.combo_aba.configure(
+                values=abas
+            )
+
+
+            if abas:
+                self.combo_aba.set(
+                    abas[0]
+                )
+
+
 
     def gerar_sql(self):
 
-        # Verifica se um arquivo foi escolhido
         if not self.caminho_excel:
             print("Selecione um arquivo Excel.")
             return
 
-        # Nome do hotel escolhido
+
         hotel = self.combo_hotel.get()
 
-        # Busca o ID do hotel
+
         id_hotel = buscar_id(hotel)
 
-        # Lê a planilha
-        dados = ler_planilha(self.caminho_excel)
 
-        # Gera o SQL
-        sql = gerar_sql_manutencao(dados, id_hotel)
+        aba = self.combo_aba.get()
 
-        # Mostra o SQL na tela
-        self.textbox.delete("1.0", "end")
-        self.textbox.insert("1.0", sql)
+
+        dados = ler_planilha(
+            self.caminho_excel,
+            aba
+        )
+
+
+        sql = gerar_sql_manutencao(
+            dados,
+            id_hotel
+        )
+
+
+        self.textbox.delete(
+            "1.0",
+            "end"
+        )
+
+
+        self.textbox.insert(
+            "1.0",
+            sql
+        )
+
+
 
     def copiar_sql(self):
 
-        sql = self.textbox.get("1.0", "end")
+        sql = self.textbox.get(
+            "1.0",
+            "end"
+        )
+
 
         self.clipboard_clear()
-        self.clipboard_append(sql)
+
+        self.clipboard_append(
+            sql
+        )
+
+
 
     def limpar(self):
 
-        self.textbox.delete("1.0", "end")
+        self.textbox.delete(
+            "1.0",
+            "end"
+        )
