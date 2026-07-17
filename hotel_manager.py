@@ -17,6 +17,3 @@ def buscar_id(nome_hotel):
             return hotel['ID_hotel']
     return None
 
-print(carregar_hoteis())
-print(listar_nomes())
-print(buscar_id('Máceio Mar RESORT'))

@@ -1,4 +1,4 @@
-def gerar_sql(dados, id_hotel):
+def gerar_sql_manutencao(dados, id_hotel):
     """
     Recebe um DataFrame e gera o SQL.
     """
